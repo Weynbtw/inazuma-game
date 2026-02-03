@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1v1 Fire Tornado Football</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            background: #0a5;
+            border: 4px solid #2c3e50;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #score {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 2px solid gold;
+        }
+
+        .special-btn {
+            position: absolute;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 51, 0, 0.5);
+            border: 3px solid;
+            z-index: 100;
+            transform: translateX(-50%);
+            transition: all 0.3s;
+        }
+
+        #fireTornadoBtn {
+            background: linear-gradient(135deg, #ff3300, #ff9900);
+            border-color: #ff9900;
+            bottom: 30px;
+            left: 50%;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        #encounterBtn1, #encounterBtn2 {
+            display: none;
+            bottom: 30px;
+            min-width: 150px;
+        }
+
+        #encounterBtn1 {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #2980b9;
+            left: 40%;
+        }
+
+        #encounterBtn2 {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-color: #27ae60;
+            left: 60%;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        .special-btn:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .video-container {
+            width: 80%;
+            height: 80%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .video-overlay video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .skip-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 2001;
+        }
+
+        .skip-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            border: 2px solid #3498db;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #gameOver {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            border: 5px solid gold;
+            min-width: 400px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        #gameOver h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: gold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOver p {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        #restartBtn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border: 3px solid #1e8449;
+        }
+
+        #restartBtn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #27ae60, #219653);
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .goalFlash {
+            animation: goalFlash 0.5s;
+        }
+
+        @keyframes goalFlash {
+            0%, 100% { background: #0a5; }
+            50% { background: #2ecc71; }
+        }
+
+        #encounterOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            z-index: 100;
+            display: none;
+            border: 3px solid gold;
+            width: 400px;
+        }
+
+        #goalResetOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            z-index: 150;
+            display: none;
+            border: 4px solid gold;
+        }
+
+        #goalResetTimer {
+            font-size: 48px;
+            font-weight: bold;
+            color: gold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        #musicToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid gold;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        
+        #musicToggle:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+        
+        #resumeGameBtn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button id="musicToggle" onclick="toggleMusic()">🔊 Music OFF</button>
+    <button id="resumeGameBtn" onclick="forceResumeGame()">Resume Game (If Stuck)</button>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1200" height="800"></canvas>
+        
+        <div id="ui">
+            <div id="score">PLAYER: 0 - AI: 0</div>
+        </div>
+        
+        <div id="controls">
+            WASD to move | SPACE to shoot
+        </div>
+        
+        <button id="fireTornadoBtn" class="special-btn">🔥 FIRE TORNADO 🌪️</button>
+        <button id="encounterBtn1" class="special-btn">DODGE</button>
+        <button id="encounterBtn2" class="special-btn">CHARGE</button>
+    </div>
+
+    <div id="encounterOverlay">
+        <p id="encounterText"></p>
+        <div id="encounterResult"></div>
+    </div>
+
+    <div id="goalResetOverlay">
+        <div id="goalResetTimer">2</div>
+        <div id="goalResetText">GOAL! Next round starting...</div>
+    </div>
+
+    <!-- Video Overlays -->
+    <div id="fireTornadoVideoOverlay" class="video-overlay">
+        <div class="video-container">
+            <video id="fireTornadoVideo"></video>
+        </div>
+        <button class="skip-btn" onclick="skipFireTornadoVideo()">Skip Video</button>
+    </div>
+    
+    <div id="goalkeeperVideoOverlay" class="video-overlay">
+        <div class="video-container">
+            <video id="goalkeeperVideo"></video>
+        </div>
+        <button class="skip-btn" onclick="skipGoalkeeperVideo()">Skip Video</button>
+    </div>
+    
+    <div id="aiShotVideoOverlay" class="video-overlay">
+        <div class="video-container">
+            <video id="aiShotVideo"></video>
+        </div>
+        <button class="skip-btn" onclick="skipAiShotVideo()">Skip Video</button>
+    </div>
+
+    <div id="gameOver">
+        <h1>GAME OVER</h1>
+        <p id="winnerText"></p>
+        <button id="restartBtn" onclick="restartGame()">PLAY AGAIN</button>
+    </div>
+
+    <script>
+        // ========== GAME SETUP ==========
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const fireTornadoBtn = document.getElementById('fireTornadoBtn');
+        const encounterBtn1 = document.getElementById('encounterBtn1');
+        const encounterBtn2 = document.getElementById('encounterBtn2');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverScreen = document.getElementById('gameOver');
+        const winnerText = document.getElementById('winnerText');
+        const encounterOverlay = document.getElementById('encounterOverlay');
+        const encounterText = document.getElementById('encounterText');
+        const goalResetOverlay = document.getElementById('goalResetOverlay');
+        const goalResetTimer = document.getElementById('goalResetTimer');
+        const musicToggle = document.getElementById('musicToggle');
+        const resumeGameBtn = document.getElementById('resumeGameBtn');
+        
+        // Video elements
+        const fireTornadoVideo = document.getElementById('fireTornadoVideo');
+        const fireTornadoVideoOverlay = document.getElementById('fireTornadoVideoOverlay');
+        const goalkeeperVideo = document.getElementById('goalkeeperVideo');
+        const goalkeeperVideoOverlay = document.getElementById('goalkeeperVideoOverlay');
+        const aiShotVideo = document.getElementById('aiShotVideo');
+        const aiShotVideoOverlay = document.getElementById('aiShotVideoOverlay');
+        
+        // Background music
+        const bgMusic = new Audio("https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/gods.mp3");
+        bgMusic.loop = true;
+        bgMusic.volume = 0.3;
+        let musicEnabled = false;
+        
+        // Load character images
+        const playerImage = new Image();
+        const aiImage = new Image();
+        const playerGoalkeeperImage = new Image();
+        const aiGoalkeeperImage = new Image();
+        const ballImage = new Image();
+        
+        playerImage.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/axel.png";
+        aiImage.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/jude.png";
+        playerGoalkeeperImage.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/mark.png";
+        aiGoalkeeperImage.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/king.png";
+        ballImage.src = "http://raw.githubusercontent.com/Weynbtw/inazuma-game/main/ball.png";
+
+        // Game constants - SMALLER FIELD FOR BETTER ZOOM
+        const FIELD_WIDTH = 1800;
+        const FIELD_HEIGHT = 1200;
+        const VIEWPORT_WIDTH = 1200;
+        const VIEWPORT_HEIGHT = 800;
+        const GOAL_WIDTH = 300;
+        const GOAL_DEPTH = 80;
+        const PLAYER_WIDTH = 60;
+        const PLAYER_HEIGHT = 80;
+        const GOALKEEPER_WIDTH = 50;
+        const GOALKEEPER_HEIGHT = 70;
+        const BALL_RADIUS = 20;
+        const FIRE_TORNADO_DISTANCE = 400;
+        const ENCOUNTER_DISTANCE = 80;
+        const GOALKEEPER_SAVE_DISTANCE = 150;
+        const GOALKEEPER_SAVE_CHANCE = 0.5;
+        const AI_SHOT_VIDEO_CHANCE = 0.3;
+        const GOALKEEPER_VIDEO_CHANCE = 0.3;
+        const GAME_TIME = 60;
+        const GOAL_RESET_TIME = 2;
+
+        // Camera settings - FOCUSED ON ACTION
+        let cameraX = 0;
+        let cameraY = 0;
+        
+        // Game state
+        let gameState = {
+            playerScore: 0,
+            aiScore: 0,
+            timeLeft: GAME_TIME,
+            gameOver: false,
+            canUseFireTornado: false,
+            isShootingFireTornado: false,
+            lastGoalTime: 0,
+            aiSlowed: false,
+            inEncounter: false,
+            playerBlinking: false,
+            aiBlinking: false,
+            blinkEndTime: 0,
+            aiBlinkEndTime: 0,
+            lastEncounterTime: 0,
+            goalResetActive: false,
+            goalResetCountdown: 0,
+            lastFrameTime: Date.now(),
+            aiStartDelayActive: false,
+            aiStartDelayEnd: 0,
+            goalkeeperHasBall: false,
+            goalkeeperBallOwner: null,
+            goalkeeperHoldEndTime: 0,
+            penguinsActive: false,
+            penguins: [],
+            penguinEndTime: 0,
+            isPassing: false,
+            passTarget: null,
+            passFrom: null,
+            passTo: null,
+            passProgress: 0,
+            aiShotVideoCooldown: 0,
+            goalkeeperVideoCooldown: 0,
+            aiShotInProgress: false,
+            aiShotCooldownEnd: 0,
+            videoPlaying: false,
+            currentVideoType: null,
+            aiCanMove: true,
+            playerCanMove: true
+        };
+
+        // Game objects
+        const player = {
+            x: FIELD_WIDTH * 0.3,
+            y: FIELD_HEIGHT / 2,
+            vx: 0,
+            vy: 0,
+            width: PLAYER_WIDTH,
+            height: PLAYER_HEIGHT,
+            speed: 7,
+            hasBall: false,
+            ballAngle: Math.PI / 4,
+            lastBallAngle: 0
+        };
+
+        const ai = {
+            x: FIELD_WIDTH * 0.7,
+            y: FIELD_HEIGHT / 2,
+            vx: 0,
+            vy: 0,
+            width: PLAYER_WIDTH,
+            height: PLAYER_HEIGHT,
+            normalSpeed: 5.5,
+            speed: 5.5,
+            hasBall: false,
+            ballAngle: -Math.PI / 4,
+            originalSpeed: 5.5,
+            frozen: false,
+            freezeEndTime: 0,
+            alwaysShootDistance: 500
+        };
+
+        const ball = {
+            x: FIELD_WIDTH / 2,
+            y: FIELD_HEIGHT / 2,
+            vx: 0,
+            vy: 0,
+            radius: BALL_RADIUS,
+            rotation: 0,
+            spin: 0
+        };
+
+        // Goalkeepers
+        const playerGoalkeeper = {
+            x: GOAL_DEPTH + 40,
+            y: FIELD_HEIGHT / 2,
+            width: GOALKEEPER_WIDTH,
+            height: GOALKEEPER_HEIGHT,
+            speed: 2.5,
+            direction: 1,
+            minY: FIELD_HEIGHT/2 - GOAL_WIDTH/2 + 60,
+            maxY: FIELD_HEIGHT/2 + GOAL_WIDTH/2 - 60
+        };
+
+        const aiGoalkeeper = {
+            x: FIELD_WIDTH - GOAL_DEPTH - 40,
+            y: FIELD_HEIGHT / 2,
+            width: GOALKEEPER_WIDTH,
+            height: GOALKEEPER_HEIGHT,
+            speed: 2.5,
+            direction: 1,
+            minY: FIELD_HEIGHT/2 - GOAL_WIDTH/2 + 60,
+            maxY: FIELD_HEIGHT/2 + GOAL_WIDTH/2 - 60
+        };
+
+        // debug logging
+
+        let debugLog = [];
+        const MAX_DEBUG_LOGS = 10;
+
+        function addDebugLog(message) {
+        debugLog.unshift(`${new Date().toLocaleTimeString()}: ${message}`);
+        if (debugLog.length > MAX_DEBUG_LOGS) {
+        debugLog.pop();
+        }
+}
+
+        // ========== INPUT ==========
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            if (!gameState.playerCanMove || gameState.goalResetActive || gameState.goalkeeperHasBall) return;
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === ' ') e.preventDefault();
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // ========== VIDEO SYSTEM ==========
+        function playVideo(type, saveData = null) {
+    if (gameState.videoPlaying) return;
+    
+    // FIX: Store current time before video starts
+    const currentTime = Date.now();
+    gameState.lastFrameTime = currentTime; // Reset frame time to prevent time delta accumulation
+    
+    gameState.videoPlaying = true;
+    gameState.currentVideoType = type;
+    resumeGameBtn.style.display = 'block';
+    gameState.playerCanMove = false;
+    gameState.aiCanMove = false;
+    
+    // FIX: Also stop players during video
+    player.vx = 0;
+    player.vy = 0;
+    ai.vx = 0;
+    ai.vy = 0;
+    
+    let videoElement, overlay;
+    
+    switch(type) {
+        case 'fireTornado':
+            videoElement = fireTornadoVideo;
+            overlay = fireTornadoVideoOverlay;
+            videoElement.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/tornado.mp4";
+            break;
+        case 'goalkeeper':
+            videoElement = goalkeeperVideo;
+            overlay = goalkeeperVideoOverlay;
+            if (saveData) {
+                const isAI = saveData.goalkeeperType === 'ai';
+                videoElement.src = isAI ? 
+                    (saveData.success ? 
+                        "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/shieldblock.mp4" :
+                        "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/shieldmiss.mp4") :
+                    (saveData.success ? 
+                        "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/godhand.mp4" :
+                        "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/godhandfail.mp4");
+            }
+            break;
+        case 'aiShot':
+            videoElement = aiShotVideo;
+            overlay = aiShotVideoOverlay;
+            videoElement.src = "https://raw.githubusercontent.com/Weynbtw/inazuma-game/main/penguinshotai.mp4";
+            break;
+    }
+    
+    overlay.style.display = 'flex';
+    videoElement.load();
+    
+    const cleanup = () => {
+        videoElement.pause();
+        videoElement.currentTime = 0;
+        overlay.style.display = 'none';
+        gameState.videoPlaying = false;
+        gameState.currentVideoType = null;
+        
+        // FIX: Reset frame time when video ends
+        gameState.lastFrameTime = Date.now();
+        resumeGame();
+    };
+    
+    videoElement.onended = cleanup;
+    videoElement.onerror = cleanup;
+    
+    videoElement.play().catch(cleanup);
+    
+    return true;
+}
+
+        function skipFireTornadoVideo() {
+            fireTornadoVideo.pause();
+            fireTornadoVideo.currentTime = 0;
+            fireTornadoVideoOverlay.style.display = 'none';
+            gameState.videoPlaying = false;
+            gameState.currentVideoType = null;
+            resumeGame();
+        }
+
+        function skipGoalkeeperVideo() {
+            goalkeeperVideo.pause();
+            goalkeeperVideo.currentTime = 0;
+            goalkeeperVideoOverlay.style.display = 'none';
+            gameState.videoPlaying = false;
+            gameState.currentVideoType = null;
+            resumeGame();
+        }
+
+        function skipAiShotVideo() {
+            aiShotVideo.pause();
+            aiShotVideo.currentTime = 0;
+            aiShotVideoOverlay.style.display = 'none';
+            gameState.videoPlaying = false;
+            gameState.currentVideoType = null;
+            resumeGame();
+        }
+
+        // ========== GAME FUNCTIONS ==========
+        function updateCamera() {
+            // Focus on the ball or player with ball
+            let targetX, targetY;
+            
+            if (player.hasBall) {
+                targetX = player.x;
+                targetY = player.y;
+            } else if (ai.hasBall) {
+                targetX = ai.x;
+                targetY = ai.y;
+            } else {
+                targetX = ball.x;
+                targetY = ball.y;
+            }
+            
+            // Smooth camera movement
+            cameraX += (targetX - VIEWPORT_WIDTH/2 - cameraX) * 0.08;
+            cameraY += (targetY - VIEWPORT_HEIGHT/2 - cameraY) * 0.08;
+            
+            // Keep camera within bounds
+            cameraX = Math.max(0, Math.min(FIELD_WIDTH - VIEWPORT_WIDTH, cameraX));
+            cameraY = Math.max(0, Math.min(FIELD_HEIGHT - VIEWPORT_HEIGHT, cameraY));
+        }
+
+        function updatePlayer() {
+    // Check if blinking should end based on time
+    if (gameState.playerBlinking && Date.now() > gameState.blinkEndTime) {
+        gameState.playerBlinking = false;
+    }
+    
+    // DON'T MOVE if player is blinking, in encounter, or other restrictions
+    if (gameState.playerBlinking || !gameState.playerCanMove || gameState.goalResetActive || 
+        gameState.isPassing || gameState.videoPlaying || gameState.inEncounter) {
+        // Also reset velocity to prevent any residual movement
+        player.vx = 0;
+        player.vy = 0;
+        return;
+    }
+    
+    player.vx = 0;
+    player.vy = 0;
+    
+    if (keys['w']) player.vy = -player.speed;
+    if (keys['s']) player.vy = player.speed;
+    if (keys['a']) player.vx = -player.speed;
+    if (keys['d']) player.vx = player.speed;
+    
+    if (player.vx !== 0 && player.vy !== 0) {
+        player.vx *= 0.707;
+        player.vy *= 0.707;
+    }
+    
+    if (player.vx !== 0 || player.vy !== 0) {
+        player.lastBallAngle = Math.atan2(player.vy, player.vx);
+    }
+    
+    player.x += player.vx;
+    player.y += player.vy;
+    
+    player.x = Math.max(player.width, Math.min(FIELD_WIDTH - player.width, player.x));
+    player.y = Math.max(player.height, Math.min(FIELD_HEIGHT - player.height, player.y));
+    
+    if (player.hasBall && !gameState.isPassing && !gameState.goalkeeperHasBall) {
+        const angle = player.lastBallAngle;
+        ball.x = player.x + Math.cos(angle) * (player.width/2 + BALL_RADIUS + 15);
+        ball.y = player.y + Math.sin(angle) * (player.height/2 + BALL_RADIUS + 15);
+        ball.spin = Math.sqrt(player.vx * player.vx + player.vy * player.vy) * 0.1;
+    }
+    
+    if (keys[' '] && player.hasBall && !gameState.inEncounter && 
+        !gameState.isPassing && !gameState.goalkeeperHasBall && !gameState.videoPlaying) {
+        shootBall();
+    }
+    
+    if (!gameState.goalkeeperHasBall && !gameState.videoPlaying) {
+        checkFireTornado();
+        checkEncounter();
+    }
+}
+
+        function updateAI() {
+    // Check if blinking should end based on time
+    if (gameState.aiBlinking && Date.now() > gameState.aiBlinkEndTime) {
+        gameState.aiBlinking = false;
+        ai.frozen = false;
+    }
+    
+    // CRITICAL FIX: Don't move if AI is blinking OR in encounter
+    if (gameState.aiBlinking || gameState.videoPlaying || !gameState.aiCanMove || 
+        gameState.inEncounter || gameState.goalResetActive || gameState.goalkeeperHasBall || 
+        gameState.isPassing) {
+        // Also reset velocity to prevent any residual movement
+        ai.vx = 0;
+        ai.vy = 0;
+        return;
+    }
+    
+    if (gameState.aiStartDelayActive && Date.now() < gameState.aiStartDelayEnd) {
+        return;
+    } else if (gameState.aiStartDelayActive) {
+        gameState.aiStartDelayActive = false;
+    }
+    
+    if (gameState.canUseFireTornado && !gameState.aiSlowed) {
+        ai.speed = ai.originalSpeed * 0.3;
+        gameState.aiSlowed = true;
+    } else if (!gameState.canUseFireTornado && gameState.aiSlowed) {
+        ai.speed = ai.originalSpeed;
+        gameState.aiSlowed = false;
+    }
+    
+    // Check if AI can shoot (cooldown AND not already in progress)
+    const canShoot = Date.now() > gameState.aiShotCooldownEnd && !gameState.aiShotInProgress;
+    
+    if (ai.hasBall && !gameState.isPassing && canShoot) {
+        const goalX = 0;
+        const goalY = FIELD_HEIGHT / 2;
+        const distanceToGoal = distance(ai.x, ai.y, goalX, goalY);
+        const angle = Math.atan2(goalY - ai.y, goalX - ai.x);
+        
+        ai.vx = Math.cos(angle) * ai.speed * 0.7;
+        ai.vy = Math.sin(angle) * ai.speed * 0.7;
+        
+        // Only position ball with AI if AI still has it
+        if (ai.hasBall) {
+            ball.x = ai.x + Math.cos(ai.ballAngle) * (ai.width/2 + BALL_RADIUS + 15);
+            ball.y = ai.y + Math.sin(ai.ballAngle) * (ai.width/2 + BALL_RADIUS + 15);
+            ai.ballAngle += 0.1;
+        }
+        
+        // SHOOT CONDITION: Only shoot if close enough AND has ball
+        if (distanceToGoal < ai.alwaysShootDistance && ai.hasBall) {
+            console.log("AI attempting to shoot, distance:", distanceToGoal, "hasBall:", ai.hasBall);
+            shootAIBall();
+        }
+    } else if (!gameState.isPassing && !ai.hasBall) {
+        // AI doesn't have ball, chase it
+        const angle = Math.atan2(ball.y - ai.y, ball.x - ai.x);
+        ai.vx = Math.cos(angle) * ai.speed;
+        ai.vy = Math.sin(angle) * ai.speed;
+        
+        ai.vx += (Math.random() - 0.5) * 0.5;
+        ai.vy += (Math.random() - 0.5) * 0.5;
+    } else if (gameState.aiShotInProgress) {
+        // AI just shot, slow down or stop
+        ai.vx *= 0.8;
+        ai.vy *= 0.8;
+    }
+    
+    ai.x += ai.vx;
+    ai.y += ai.vy;
+    
+    ai.x = Math.max(ai.width, Math.min(FIELD_WIDTH - ai.width, ai.x));
+    ai.y = Math.max(ai.height, Math.min(FIELD_HEIGHT - ai.height, ai.y));
+}
+
+        function updateGoalkeepers() {
+            if (gameState.videoPlaying) return;
+            
+            playerGoalkeeper.y += playerGoalkeeper.speed * playerGoalkeeper.direction;
+            if (playerGoalkeeper.y <= playerGoalkeeper.minY || playerGoalkeeper.y >= playerGoalkeeper.maxY) {
+                playerGoalkeeper.direction *= -1;
+            }
+            
+            aiGoalkeeper.y += aiGoalkeeper.speed * aiGoalkeeper.direction;
+            if (aiGoalkeeper.y <= aiGoalkeeper.minY || aiGoalkeeper.y >= aiGoalkeeper.maxY) {
+                aiGoalkeeper.direction *= -1;
+            }
+        }
+
+        function updateBall() {
+    if (gameState.goalResetActive || gameState.videoPlaying || gameState.inEncounter) return; // FIX: Don't update ball during encounters
+    
+    if (gameState.goalkeeperHasBall) {
+        if (Date.now() > gameState.goalkeeperHoldEndTime) {
+            startGoalkeeperPass();
+        }
+        return;
+    }
+    
+    if (gameState.isPassing) {
+        updatePass();
+        return;
+    }
+    
+    // Ball is free
+    if (!player.hasBall && !ai.hasBall) {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        ball.vx *= 0.99;
+        ball.vy *= 0.99;
+        ball.vy += 0.1;
+        ball.rotation += ball.spin;
+        
+        if (ball.x < 0 || ball.x > FIELD_WIDTH) {
+            ball.vx *= -0.7;
+            ball.x = Math.max(0, Math.min(FIELD_WIDTH, ball.x));
+        }
+        if (ball.y < 0 || ball.y > FIELD_HEIGHT) {
+            ball.vy *= -0.7;
+            ball.y = Math.max(0, Math.min(FIELD_HEIGHT, ball.y));
+        }
+        
+        checkBallPossession();
+    }
+    
+    checkGoals();
+    checkGoalkeeperSaves();
+}
+
+        function checkBallPossession() {
+    if (gameState.inEncounter || gameState.goalResetActive || gameState.goalkeeperHasBall || gameState.isPassing) return;
+    
+    const playerDist = distance(player.x, player.y, ball.x, ball.y);
+    if (playerDist < player.width/2 + ball.radius + 5) {
+        // DON'T give possession back if ball was just shot
+        if (Math.abs(ball.vx) > 5 || Math.abs(ball.vy) > 5) {
+            // Ball is moving fast, don't give possession
+            return;
+        }
+        player.hasBall = true;
+        ai.hasBall = false;
+        ball.vx = player.vx * 0.3;
+        ball.vy = player.vy * 0.3;
+    }
+    
+    const aiDist = distance(ai.x, ai.y, ball.x, ball.y);
+    if (aiDist < ai.width/2 + ball.radius + 5) {
+        // DON'T give possession back if ball was just shot
+        if (Math.abs(ball.vx) > 5 || Math.abs(ball.vy) > 5) {
+            // Ball is moving fast, don't give possession
+            return;
+        }
+        ai.hasBall = true;
+        player.hasBall = false;
+        ball.vx = ai.vx * 0.3;
+        ball.vy = ai.vy * 0.3;
+    }
+}
+
+        function checkFireTornado() {
+            if (!player.hasBall) {
+                fireTornadoBtn.style.display = 'none';
+                gameState.canUseFireTornado = false;
+                return;
+            }
+            
+            const distToGoal = distance(player.x, player.y, FIELD_WIDTH, FIELD_HEIGHT / 2);
+            if (distToGoal < FIRE_TORNADO_DISTANCE) {
+                gameState.canUseFireTornado = true;
+                fireTornadoBtn.style.display = 'block';
+            } else {
+                gameState.canUseFireTornado = false;
+                fireTornadoBtn.style.display = 'none';
+            }
+        }
+
+        function checkEncounter() {
+            if (gameState.inEncounter || gameState.goalResetActive || Date.now() - gameState.lastEncounterTime < 3000) return;
+            
+            const dist = distance(player.x, player.y, ai.x, ai.y);
+            if (dist < ENCOUNTER_DISTANCE) {
+                if (player.hasBall) {
+                    startEncounter('attack');
+                } else if (ai.hasBall) {
+                    startEncounter('defense');
+                }
+            }
+        }
+
+        function startEncounter(type) {
+    gameState.inEncounter = true;
+    gameState.playerCanMove = false;
+    gameState.aiCanMove = false;
+    
+    // FIX: Store current time before encounter starts
+    gameState.lastFrameTime = Date.now(); // Reset frame time to prevent time delta accumulation
+    
+    // CRITICAL: Immediately stop all movement
+    player.vx = 0;
+    player.vy = 0;
+    ai.vx = 0;
+    ai.vy = 0;
+    
+    encounterOverlay.style.display = 'block';
+    
+    if (type === 'attack') {
+        encounterText.textContent = 'AI is trying to steal the ball!';
+        encounterBtn1.textContent = 'DODGE';
+        encounterBtn2.textContent = 'CHARGE';
+    } else {
+        encounterText.textContent = 'Try to steal from AI!';
+        encounterBtn1.textContent = 'BLOCK';
+        encounterBtn2.textContent = 'SLIDE';
+    }
+    
+    encounterBtn1.style.display = 'block';
+    encounterBtn2.style.display = 'block';
+}
+
+        // In the endEncounter function:
+function endEncounter(success, type) {
+    gameState.inEncounter = false;
+    gameState.lastEncounterTime = Date.now();
+    
+    // FIX: Reset frame time when encounter ends
+    gameState.lastFrameTime = Date.now();
+    
+    encounterOverlay.style.display = 'none';
+    encounterBtn1.style.display = 'none';
+    encounterBtn2.style.display = 'none';
+    
+    if (type === 'attack') {
+        if (success) {
+            // Player keeps ball, AI is stunned
+            gameState.aiBlinking = true;
+            gameState.aiBlinkEndTime = Date.now() + 2000;
+            ai.frozen = true;
+            
+            // Player can move again immediately
+            gameState.playerCanMove = true;
+            // AI can't move while blinking
+            gameState.aiCanMove = false;
+            
+            // Schedule AI to regain movement after blinking ends
+            setTimeout(() => {
+                gameState.aiBlinking = false;
+                ai.frozen = false;
+                gameState.aiCanMove = true;
+            }, 2000);
+        } else {
+            // AI steals ball
+            ai.hasBall = true;
+            player.hasBall = false;
+            gameState.playerBlinking = true;
+            gameState.blinkEndTime = Date.now() + 2000;
+            
+            // AI can move immediately
+            gameState.aiCanMove = true;
+            // Player can't move while blinking
+            gameState.playerCanMove = false;
+            
+            // Schedule player to regain movement after blinking ends
+            setTimeout(() => {
+                gameState.playerBlinking = false;
+                gameState.playerCanMove = true;
+            }, 2000);
+        }
+    } else { // defense encounter
+        if (success) {
+            // Player steals ball
+            player.hasBall = true;
+            ai.hasBall = false;
+            gameState.aiBlinking = true;
+            gameState.aiBlinkEndTime = Date.now() + 2000;
+            ai.frozen = true;
+            
+            // Player can move immediately
+            gameState.playerCanMove = true;
+            // AI can't move while blinking
+            gameState.aiCanMove = false;
+            
+            // Schedule AI to regain movement after blinking ends
+            setTimeout(() => {
+                gameState.aiBlinking = false;
+                ai.frozen = false;
+                gameState.aiCanMove = true;
+            }, 2000);
+        } else {
+            // AI keeps ball
+            gameState.playerBlinking = true;
+            gameState.blinkEndTime = Date.now() + 2000;
+            
+            // AI can move immediately
+            gameState.aiCanMove = true;
+            // Player can't move while blinking
+            gameState.playerCanMove = false;
+            
+            // Schedule player to regain movement after blinking ends
+            setTimeout(() => {
+                gameState.playerBlinking = false;
+                gameState.playerCanMove = true;
+            }, 2000);
+        }
+    }
+}
+
+        function shootBall() {
+            if (!player.hasBall) return;
+            
+            const goalX = FIELD_WIDTH;
+            const goalY = FIELD_HEIGHT / 2;
+            const angle = Math.atan2(goalY - player.y, goalX - player.x);
+            const power = 16;
+            
+            ball.vx = Math.cos(angle) * power + player.vx * 0.5;
+            ball.vy = Math.sin(angle) * power + player.vy * 0.5;
+            player.hasBall = false;
+            fireTornadoBtn.style.display = 'none';
+            gameState.canUseFireTornado = false;
+            
+            // Add some randomness
+            ball.vx += (Math.random() - 0.5) * 3;
+            ball.vy += (Math.random() - 0.5) * 3;
+            ball.spin = (Math.random() - 0.5) * 2;
+        }
+
+        function drawDebug() {
+    if (!debugLog.length) return;
+    
+    ctx.save();
+    
+    // Debug background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(10, 50, 500, 220);
+    
+    // Debug border
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 50, 500, 220);
+    
+    // Debug title
+    ctx.fillStyle = '#00ff00';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('DEBUG LOG - AI SHOOTING', 15, 70);
+    
+    // Debug logs
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px Arial';
+    
+    // Show current state
+    ctx.fillText(`Current State: ai.hasBall=${ai.hasBall}, aiShotInProgress=${gameState.aiShotInProgress}`, 15, 90);
+    ctx.fillText(`Ball Velocity: vx=${ball.vx.toFixed(2)}, vy=${ball.vy.toFixed(2)}`, 15, 110);
+    
+    // Show recent logs
+    ctx.fillText('Recent Events:', 15, 130);
+    
+    for (let i = 0; i < Math.min(debugLog.length, 5); i++) {
+        ctx.fillText(debugLog[i], 20, 150 + i * 20);
+    }
+    
+    ctx.restore();
+}
+
+    function shootAIBall() {
+    addDebugLog(`shootAIBall called. ai.hasBall: ${ai.hasBall}, aiShotInProgress: ${gameState.aiShotInProgress}`);
+    
+    // STRICT CHECKS: Make sure AI can actually shoot
+    if (!ai.hasBall) {
+        addDebugLog(`shootAIBall ABORTED: AI doesn't have ball`);
+        return;
+    }
+    
+    if (gameState.aiShotInProgress) {
+        addDebugLog(`shootAIBall ABORTED: Shot already in progress`);
+        return;
+    }
+    
+    if (gameState.goalResetActive) {
+        addDebugLog(`shootAIBall ABORTED: Goal reset active`);
+        return;
+    }
+    
+    if (gameState.goalkeeperHasBall) {
+        addDebugLog(`shootAIBall ABORTED: Goalkeeper has ball`);
+        return;
+    }
+    
+    if (gameState.isPassing) {
+        addDebugLog(`shootAIBall ABORTED: Passing in progress`);
+        return;
+    }
+    
+    if (gameState.videoPlaying) {
+        addDebugLog(`shootAIBall ABORTED: Video playing`);
+        return;
+    }
+    
+    // ALL CHECKS PASSED - SHOOT THE BALL!
+    gameState.aiShotInProgress = true;
+    gameState.aiShotCooldownEnd = Date.now() + 2000; // 2 second cooldown
+    
+    const goalX = 0;
+    const goalY = FIELD_HEIGHT / 2;
+    const angle = Math.atan2(goalY - ai.y, goalX - ai.x);
+    const power = 15;
+    
+    // CRITICAL: Actually shoot the ball and remove possession
+    ball.vx = Math.cos(angle) * power;
+    ball.vy = Math.sin(angle) * power;
+    ai.hasBall = false; // THIS IS THE MOST IMPORTANT LINE
+    
+    // Add some randomness
+    ball.vx += (Math.random() - 0.5) * 2;
+    ball.vy += (Math.random() - 0.5) * 2;
+    ball.spin = (Math.random() - 0.5) * 1.5;
+    
+    addDebugLog(`BALL SHOT! Velocity: vx=${ball.vx.toFixed(2)}, vy=${ball.vy.toFixed(2)}`);
+    addDebugLog(`AI possession REMOVED. ai.hasBall is now: ${ai.hasBall}`);
+    
+    // Check if we should play video (30% chance)
+    if (Math.random() < AI_SHOT_VIDEO_CHANCE && Date.now() > gameState.aiShotVideoCooldown) {
+        addDebugLog(`Playing AI shot video (${AI_SHOT_VIDEO_CHANCE * 100}% chance)`);
+        playVideo('aiShot');
+        gameState.aiShotVideoCooldown = Date.now() + 8000;
+        
+        // Create penguins effect after video starts
+        setTimeout(() => {
+            if (!gameState.goalResetActive) {
+                createPenguinsEffect();
+                addDebugLog(`Penguins effect created after video`);
+            }
+        }, 500);
+    } else {
+        // No video, just penguins
+        addDebugLog(`No video - creating penguins directly`);
+        createPenguinsEffect();
+    }
+    
+    // ALWAYS reset the shot in progress flag after a delay
+    setTimeout(() => {
+        gameState.aiShotInProgress = false;
+        addDebugLog(`AI shot cooldown ended. Ready to shoot again.`);
+    }, 1500);
+    
+    return true; // Successfully shot
+}
+
+        function createPenguinsEffect() {
+            gameState.penguinsActive = true;
+            gameState.penguinEndTime = Date.now() + 3000;
+            gameState.penguins = [];
+            
+            for (let i = 0; i < 5; i++) {
+                gameState.penguins.push({
+                    x: ball.x,
+                    y: ball.y,
+                    angle: (i * 2 * Math.PI / 5),
+                    distance: 40 + Math.random() * 20,
+                    size: 10 + Math.random() * 8,
+                    speed: 0.3 + Math.random() * 0.4,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function checkGoalkeeperSaves() {
+            if (gameState.goalResetActive || gameState.goalkeeperHasBall || gameState.videoPlaying) return;
+            
+            // Check AI goalkeeper save (player shooting toward AI goal)
+            const distToAIGoalkeeper = distance(ball.x, ball.y, aiGoalkeeper.x, aiGoalkeeper.y);
+            const isMovingTowardAIGoal = ball.vx > 8 && ball.x > FIELD_WIDTH/2;
+            
+            if (distToAIGoalkeeper < GOALKEEPER_SAVE_DISTANCE && isMovingTowardAIGoal) {
+                const saveSuccessful = Math.random() < GOALKEEPER_SAVE_CHANCE;
+                
+                if (Math.random() < GOALKEEPER_VIDEO_CHANCE && Date.now() > gameState.goalkeeperVideoCooldown) {
+                    playVideo('goalkeeper', { goalkeeperType: 'ai', success: saveSuccessful });
+                    gameState.goalkeeperVideoCooldown = Date.now() + 8000;
+                }
+                
+                handleGoalkeeperSave('ai', saveSuccessful);
+                return;
+            }
+            
+            // Check player goalkeeper save (AI shooting toward player goal)
+            const distToPlayerGoalkeeper = distance(ball.x, ball.y, playerGoalkeeper.x, playerGoalkeeper.y);
+            const isMovingTowardPlayerGoal = ball.vx < -8 && ball.x < FIELD_WIDTH/2;
+            
+            if (distToPlayerGoalkeeper < GOALKEEPER_SAVE_DISTANCE && isMovingTowardPlayerGoal) {
+                const saveSuccessful = Math.random() < GOALKEEPER_SAVE_CHANCE;
+                
+                if (Math.random() < GOALKEEPER_VIDEO_CHANCE && Date.now() > gameState.goalkeeperVideoCooldown) {
+                    playVideo('goalkeeper', { goalkeeperType: 'player', success: saveSuccessful });
+                    gameState.goalkeeperVideoCooldown = Date.now() + 8000;
+                }
+                
+                handleGoalkeeperSave('player', saveSuccessful);
+                return;
+            }
+        }
+
+        function handleGoalkeeperSave(type, saveSuccessful) {
+            if (saveSuccessful) {
+                gameState.goalkeeperHasBall = true;
+                gameState.goalkeeperBallOwner = type;
+                gameState.goalkeeperHoldEndTime = Date.now() + 2000;
+                
+                if (type === 'ai') {
+                    ball.x = aiGoalkeeper.x;
+                    ball.y = aiGoalkeeper.y;
+                } else {
+                    ball.x = playerGoalkeeper.x;
+                    ball.y = playerGoalkeeper.y;
+                }
+                
+                ball.vx = 0;
+                ball.vy = 0;
+                ball.spin = 0;
+            } else {
+                // Ball deflects
+                ball.vx = type === 'ai' ? 15 : -15;
+                ball.vy = (Math.random() - 0.5) * 10;
+            }
+        }
+
+        function startGoalkeeperPass() {
+            gameState.goalkeeperHasBall = false;
+            gameState.isPassing = true;
+            gameState.passProgress = 0;
+            
+            if (gameState.goalkeeperBallOwner === 'ai') {
+                gameState.passTarget = 'ai';
+                gameState.passFrom = {x: aiGoalkeeper.x, y: aiGoalkeeper.y};
+                gameState.passTo = {x: ai.x, y: ai.y};
+            } else {
+                gameState.passTarget = 'player';
+                gameState.passFrom = {x: playerGoalkeeper.x, y: playerGoalkeeper.y};
+                gameState.passTo = {x: player.x, y: player.y};
+            }
+        }
+
+        function updatePass() {
+            if (!gameState.isPassing) return;
+            
+            gameState.passProgress += 0.04;
+            
+            if (gameState.passProgress >= 1) {
+                gameState.isPassing = false;
+                ball.x = gameState.passTo.x;
+                ball.y = gameState.passTo.y;
+                
+                if (gameState.passTarget === 'player') {
+                    player.hasBall = true;
+                } else {
+                    ai.hasBall = true;
+                }
+            } else {
+                ball.x = gameState.passFrom.x + (gameState.passTo.x - gameState.passFrom.x) * gameState.passProgress;
+                ball.y = gameState.passFrom.y + (gameState.passTo.y - gameState.passFrom.y) * gameState.passProgress;
+                const arcHeight = 70;
+                const progress = gameState.passProgress;
+                ball.y -= Math.sin(progress * Math.PI) * arcHeight;
+            }
+        }
+
+        function checkGoals() {
+    if (Date.now() - gameState.lastGoalTime < 1000) return;
+    
+    // Player scores on AI goal (right side)
+    if (ball.x > FIELD_WIDTH - GOAL_DEPTH && 
+        ball.y > FIELD_HEIGHT/2 - GOAL_WIDTH/2 && 
+        ball.y < FIELD_HEIGHT/2 + GOAL_WIDTH/2) {
+        
+        // FIX: 50% chance to score (like real goalkeeper chance)
+        const willScore = Math.random() < 0.5;
+        if (willScore) {
+            scoreGoal('player');
+        } else {
+            // Ball hits goal post or gets saved
+            ball.vx = -ball.vx * 0.8;
+            ball.vy = (Math.random() - 0.5) * 10;
+            gameState.lastGoalTime = Date.now();
+        }
+    }
+    
+    // AI scores on player goal (left side)
+    if (ball.x < GOAL_DEPTH && 
+        ball.y > FIELD_HEIGHT/2 - GOAL_WIDTH/2 && 
+        ball.y < FIELD_HEIGHT/2 + GOAL_WIDTH/2) {
+        
+        // FIX: 50% chance to score (like real goalkeeper chance)
+        const willScore = Math.random() < 0.5;
+        if (willScore) {
+            scoreGoal('ai');
+        } else {
+            // Ball hits goal post or gets saved
+            ball.vx = -ball.vx * 0.8;
+            ball.vy = (Math.random() - 0.5) * 10;
+            gameState.lastGoalTime = Date.now();
+        }
+    }
+}
+
+        function scoreGoal(scorer) {
+            gameState.lastGoalTime = Date.now();
+            
+            if (scorer === 'player') {
+                gameState.playerScore++;
+            } else {
+                gameState.aiScore++;
+            }
+            
+            updateScoreDisplay();
+            canvas.classList.add('goalFlash');
+            setTimeout(() => canvas.classList.remove('goalFlash'), 500);
+            startGoalReset();
+        }
+
+        function startGoalReset() {
+            gameState.goalResetActive = true;
+            gameState.goalResetCountdown = GOAL_RESET_TIME;
+            goalResetOverlay.style.display = 'block';
+            goalResetTimer.textContent = GOAL_RESET_TIME;
+            
+            player.hasBall = false;
+            ai.hasBall = false;
+            gameState.goalkeeperHasBall = false;
+            gameState.playerCanMove = false;
+            gameState.aiCanMove = false;
+            
+            const countdownInterval = setInterval(() => {
+                gameState.goalResetCountdown--;
+                goalResetTimer.textContent = gameState.goalResetCountdown;
+                
+                if (gameState.goalResetCountdown <= 0) {
+                    clearInterval(countdownInterval);
+                    endGoalReset();
+                }
+            }, 1000);
+        }
+
+        function endGoalReset() {
+            gameState.goalResetActive = false;
+            goalResetOverlay.style.display = 'none';
+            
+            resetPositions();
+            
+            gameState.playerCanMove = true;
+            gameState.aiCanMove = true;
+            gameState.aiStartDelayActive = true;
+            gameState.aiStartDelayEnd = Date.now() + 800;
+        }
+
+        function resetPositions() {
+            player.x = FIELD_WIDTH * 0.3;
+            player.y = FIELD_HEIGHT / 2;
+            player.vx = 0;
+            player.vy = 0;
+            player.lastBallAngle = Math.PI / 4;
+            
+            ai.x = FIELD_WIDTH * 0.7;
+            ai.y = FIELD_HEIGHT / 2;
+            ai.vx = 0;
+            ai.vy = 0;
+            ai.speed = ai.originalSpeed;
+            ai.frozen = false;
+            
+            ball.x = FIELD_WIDTH / 2;
+            ball.y = FIELD_HEIGHT / 2;
+            ball.vx = 0;
+            ball.vy = 0;
+            ball.spin = 0;
+            ball.rotation = 0;
+            
+            gameState.playerBlinking = false;
+            gameState.aiBlinking = false;
+            gameState.penguinsActive = false;
+            gameState.penguins = [];
+        }
+
+        // ========== RENDERING ==========
+        function drawField() {
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, FIELD_HEIGHT);
+            gradient.addColorStop(0, '#0c6');
+            gradient.addColorStop(1, '#0a5');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
+            
+            // Field lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 3;
+            
+            // Center line
+            ctx.beginPath();
+            ctx.moveTo(FIELD_WIDTH / 2, 0);
+            ctx.lineTo(FIELD_WIDTH / 2, FIELD_HEIGHT);
+            ctx.stroke();
+            
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 100, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Goals
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fillRect(0, FIELD_HEIGHT/2 - GOAL_WIDTH/2, GOAL_DEPTH, GOAL_WIDTH);
+            ctx.fillRect(FIELD_WIDTH - GOAL_DEPTH, FIELD_HEIGHT/2 - GOAL_WIDTH/2, GOAL_DEPTH, GOAL_WIDTH);
+            
+            // Goal outlines
+            ctx.strokeStyle = 'rgba(200, 200, 200, 0.9)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, FIELD_HEIGHT/2 - GOAL_WIDTH/2, GOAL_DEPTH, GOAL_WIDTH);
+            ctx.strokeRect(FIELD_WIDTH - GOAL_DEPTH, FIELD_HEIGHT/2 - GOAL_WIDTH/2, GOAL_DEPTH, GOAL_WIDTH);
+            
+            ctx.restore();
+        }
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            if (gameState.playerBlinking && Math.floor(Date.now() / 200) % 2 === 0) {
+                ctx.globalAlpha = 0.5;
+            }
+            
+            if (playerImage.complete) {
+                ctx.drawImage(
+                    playerImage,
+                    player.x - player.width/2,
+                    player.y - player.height/2,
+                    player.width,
+                    player.height
+                );
+            } else {
+                // Fallback
+                ctx.fillStyle = '#3498db';
+                ctx.fillRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawAI() {
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            if (gameState.aiBlinking && Math.floor(Date.now() / 200) % 2 === 0) {
+                ctx.globalAlpha = 0.5;
+            }
+            
+            if (aiImage.complete) {
+                ctx.drawImage(
+                    aiImage,
+                    ai.x - ai.width/2,
+                    ai.y - ai.height/2,
+                    ai.width,
+                    ai.height
+                );
+            } else {
+                // Fallback
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(ai.x - ai.width/2, ai.y - ai.height/2, ai.width, ai.height);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawGoalkeepers() {
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            if (playerGoalkeeperImage.complete) {
+                ctx.drawImage(
+                    playerGoalkeeperImage,
+                    playerGoalkeeper.x - playerGoalkeeper.width/2,
+                    playerGoalkeeper.y - playerGoalkeeper.height/2,
+                    playerGoalkeeper.width,
+                    playerGoalkeeper.height
+                );
+            }
+            
+            if (aiGoalkeeperImage.complete) {
+                ctx.drawImage(
+                    aiGoalkeeperImage,
+                    aiGoalkeeper.x - aiGoalkeeper.width/2,
+                    aiGoalkeeper.y - aiGoalkeeper.height/2,
+                    aiGoalkeeper.width,
+                    aiGoalkeeper.height
+                );
+            }
+            
+            ctx.restore();
+        }
+
+        function drawBall() {
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            ctx.save();
+            ctx.translate(ball.x, ball.y);
+            ctx.rotate(ball.rotation);
+            
+            if (ballImage.complete) {
+                ctx.drawImage(
+                    ballImage,
+                    -ball.radius,
+                    -ball.radius,
+                    ball.radius * 2,
+                    ball.radius * 2
+                );
+            } else {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function drawPenguins() {
+            if (!gameState.penguinsActive) return;
+            
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+            
+            const time = Date.now() * 0.001;
+            
+            for (const penguin of gameState.penguins) {
+                penguin.phase += penguin.speed * 0.05;
+                const x = ball.x + Math.cos(penguin.angle + Math.sin(penguin.phase) * 0.5) * penguin.distance;
+                const y = ball.y + Math.sin(penguin.angle + Math.cos(penguin.phase) * 0.5) * penguin.distance;
+                
+                // Simple penguin drawing
+                ctx.fillStyle = '#2c3e50';
+                ctx.beginPath();
+                ctx.arc(x, y, penguin.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // White belly
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.ellipse(x, y + penguin.size * 0.3, penguin.size * 0.7, penguin.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(x - penguin.size * 0.3, y - penguin.size * 0.2, penguin.size * 0.15, 0, Math.PI * 2);
+                ctx.arc(x + penguin.size * 0.3, y - penguin.size * 0.2, penguin.size * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Beak
+                ctx.fillStyle = '#ff9900';
+                ctx.beginPath();
+                ctx.moveTo(x, y + penguin.size * 0.1);
+                ctx.lineTo(x + penguin.size * 0.5, y);
+                ctx.lineTo(x, y - penguin.size * 0.1);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+
+        // ========== GAME LOOP ==========
+        function gameLoop() {
+    ctx.clearRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    
+    if (!gameState.gameOver) {
+        updateCamera();
+        
+        if (!gameState.videoPlaying && !gameState.inEncounter) { // FIX: Only update game logic if not in video or encounter
+            updatePlayer();
+            updateAI();
+            updateBall();
+            updateGoalkeepers();
+        }
+        
+        if (!gameState.goalResetActive && !gameState.videoPlaying && !gameState.inEncounter) { // FIX: Don't update time during videos or encounters
+            const currentTime = Date.now();
+            const deltaTime = (currentTime - gameState.lastFrameTime) / 1000;
+            
+            gameState.timeLeft -= deltaTime;
+            
+            if (gameState.timeLeft <= 0) {
+                gameState.timeLeft = 0;
+                endGame();
+            }
+            
+            gameState.lastFrameTime = currentTime;
+            
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = Math.floor(gameState.timeLeft % 60);
+            scoreDisplay.textContent = `PLAYER: ${gameState.playerScore} - AI: ${gameState.aiScore} | TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    // Draw everything
+    drawField();
+    drawGoalkeepers();
+    drawAI();
+    drawPlayer();
+    drawBall();
+    drawPenguins();
+    
+    // ADD THIS LINE: Draw debug info ON TOP of everything
+    //drawDebug();
+    
+    requestAnimationFrame(gameLoop);
+}
+
+        // ========== GAME MANAGEMENT ==========
+        function endGame() {
+            gameState.gameOver = true;
+            bgMusic.pause();
+            
+            let winner = 'DRAW!';
+            if (gameState.playerScore > gameState.aiScore) {
+                winner = 'PLAYER WINS!';
+            } else if (gameState.aiScore > gameState.playerScore) {
+                winner = 'AI WINS!';
+            }
+            
+            winnerText.textContent = `${winner} (${gameState.playerScore}-${gameState.aiScore})`;
+            gameOverScreen.style.display = 'block';
+        }
+
+        function restartGame() {
+            // Stop all videos
+            fireTornadoVideo.pause();
+            fireTornadoVideo.currentTime = 0;
+            goalkeeperVideo.pause();
+            goalkeeperVideo.currentTime = 0;
+            aiShotVideo.pause();
+            aiShotVideo.currentTime = 0;
+            
+            // Hide all overlays
+            fireTornadoVideoOverlay.style.display = 'none';
+            goalkeeperVideoOverlay.style.display = 'none';
+            aiShotVideoOverlay.style.display = 'none';
+            resumeGameBtn.style.display = 'none';
+            
+            // Reset game state
+            gameState = {
+                playerScore: 0,
+                aiScore: 0,
+                timeLeft: GAME_TIME,
+                gameOver: false,
+                canUseFireTornado: false,
+                isShootingFireTornado: false,
+                lastGoalTime: 0,
+                aiSlowed: false,
+                inEncounter: false,
+                playerBlinking: false,
+                aiBlinking: false,
+                blinkEndTime: 0,
+                aiBlinkEndTime: 0,
+                lastEncounterTime: 0,
+                goalResetActive: false,
+                goalResetCountdown: 0,
+                lastFrameTime: Date.now(),
+                aiStartDelayActive: false,
+                aiStartDelayEnd: 0,
+                goalkeeperHasBall: false,
+                goalkeeperBallOwner: null,
+                goalkeeperHoldEndTime: 0,
+                penguinsActive: false,
+                penguins: [],
+                penguinEndTime: 0,
+                isPassing: false,
+                passTarget: null,
+                passFrom: null,
+                passTo: null,
+                passProgress: 0,
+                aiShotVideoCooldown: 0,
+                goalkeeperVideoCooldown: 0,
+                aiShotInProgress: false,
+                aiShotCooldownEnd: 0,
+                videoPlaying: false,
+                currentVideoType: null,
+                aiCanMove: true,
+                playerCanMove: true
+            };
+            
+            resetPositions();
+            updateScoreDisplay();
+            
+            fireTornadoBtn.style.display = 'none';
+            encounterBtn1.style.display = 'none';
+            encounterBtn2.style.display = 'none';
+            encounterOverlay.style.display = 'none';
+            goalResetOverlay.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            
+            startGoalReset();
+        }
+
+        function resumeGame() {
+    gameState.playerCanMove = true;
+    gameState.aiCanMove = true;
+    resumeGameBtn.style.display = 'none';
+    
+    // FIX: Reset frame time when resuming from video
+    gameState.lastFrameTime = Date.now();
+}
+
+        function forceResumeGame() {
+            // Force stop all videos
+            fireTornadoVideo.pause();
+            fireTornadoVideo.currentTime = 0;
+            goalkeeperVideo.pause();
+            goalkeeperVideo.currentTime = 0;
+            aiShotVideo.pause();
+            aiShotVideo.currentTime = 0;
+            
+            fireTornadoVideoOverlay.style.display = 'none';
+            goalkeeperVideoOverlay.style.display = 'none';
+            aiShotVideoOverlay.style.display = 'none';
+            
+            gameState.videoPlaying = false;
+            gameState.currentVideoType = null;
+            resumeGame();
+        }
+
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            if (musicEnabled) {
+                bgMusic.play().catch(() => {});
+                musicToggle.textContent = "🔊 Music ON";
+            } else {
+                bgMusic.pause();
+                musicToggle.textContent = "🔇 Music OFF";
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        fireTornadoBtn.addEventListener('click', () => {
+            if (gameState.canUseFireTornado && player.hasBall && !gameState.videoPlaying) {
+                playVideo('fireTornado');
+                
+                // Execute fire tornado after video starts
+                setTimeout(() => {
+                    if (!gameState.goalResetActive) {
+                        const goalX = FIELD_WIDTH;
+                        const goalY = FIELD_HEIGHT / 2;
+                        const angle = Math.atan2(goalY - player.y, goalX - player.x);
+                        
+                        ball.vx = Math.cos(angle) * 25;
+                        ball.vy = Math.sin(angle) * 20;
+                        player.hasBall = false;
+                        fireTornadoBtn.style.display = 'none';
+                        gameState.canUseFireTornado = false;
+                    }
+                }, 100);
+            }
+        });
+
+        encounterBtn1.addEventListener('click', () => {
+            if (!gameState.inEncounter) return;
+            const success = Math.random() < 0.5;
+            const type = encounterBtn1.textContent === 'DODGE' ? 'attack' : 'defense';
+            endEncounter(success, type);
+        });
+
+        encounterBtn2.addEventListener('click', () => {
+            if (!gameState.inEncounter) return;
+            const success = Math.random() < 0.5;
+            const type = encounterBtn2.textContent === 'CHARGE' ? 'attack' : 'defense';
+            endEncounter(success, type);
+        });
+
+        // ========== UTILITIES ==========
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `PLAYER: ${gameState.playerScore} - AI: ${gameState.aiScore}`;
+        }
+
+        // ========== INITIALIZE ==========
+        updateScoreDisplay();
+        gameState.lastFrameTime = Date.now();
+        gameLoop();
+    </script>
+</body>
+</html>
